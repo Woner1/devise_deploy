@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nickname: MyString
+  password_digest: MyString
+  wechat_id: MyString
+  phone_number: MyString
+
+two:
+  nickname: MyString
+  password_digest: MyString
+  wechat_id: MyString
+  phone_number: MyString
