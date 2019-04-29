@@ -59,5 +59,5 @@ namespace :deploy do
 
 end
 
-set :rbenv_map_bins, %w{rake gem bundle ruby rails sidekiq sidekiqctl}
+#set :rbenv_map_bins, %w{rake gem bundle ruby rails sidekiq sidekiqctl}
 set :unicorn_config_path, -> { File.join(current_path, "config", "unicorn.rb") }
