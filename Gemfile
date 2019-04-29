@@ -47,7 +47,11 @@ group :development do
   gem 'capistrano-passenger'
   gem 'capistrano-rbenv'
 
+   gem 'capistrano3-unicorn', '~> 0.2.1'
+
 end
+
+gem 'unicorn'
 
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
