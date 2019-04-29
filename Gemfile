@@ -48,7 +48,6 @@ group :development do
   gem 'capistrano-rbenv'
   gem 'capistrano-sidekiq'
   gem 'capistrano3-unicorn', '~> 0.2.1'
-
 end
 
 gem 'unicorn'
