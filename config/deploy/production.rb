@@ -7,7 +7,7 @@ server "192.168.31.47", user: "ankh", roles: %w{app db web}, my_property: :my_va
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.example.com", user: "deploy", roles: %w{db}
 
-
+set :branch,'master'
 
 # role-based syntax
 # ==================

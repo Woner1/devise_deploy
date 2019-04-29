@@ -1,35 +1,42 @@
-app_path = File.expand_path( File.join(File.dirname(__FILE__), '..', '..'))
-worker_processes   1
-timeout            180
-listen             "#{app_path}/shared/tmp/sockets/unicorn.sock"
-pid                "#{app_path}/shared/tmp/pids/unicorn.pid"
-stderr_path        "log/unicorn.log"
-stdout_path        "log/unicorn.log"
+APP_PATH   = "#{File.dirname(__FILE__)}/.." unless defined?(APP_PATH)
+RAILS_ROOT = "#{File.dirname(__FILE__)}/.." unless defined?(RAILS_ROOT)
+RAILS_ENV  = ENV['RAILS_ENV'] || 'development'
 
-# preload
+worker_processes 3
+
+listen "/tmp/unicorn.sock"
+pid "tmp/pids/unicorn.pid"
+
 preload_app true
 
-before_fork do |server, worker|
-  if defined?(ActiveRecord::Base)
-    ActiveRecord::Base.connection.disconnect!
-  end
+timeout 60
+working_directory APP_PATH
 
-  old_pid = "#{server.config[:pid]}.oldbin"
-  if File.exists?(old_pid) && server.pid != old_pid
+# log
+stderr_path "#{RAILS_ROOT}/log/unicorn_error.log"
+stdout_path "#{RAILS_ROOT}/log/unicorn_access.log"
+
+if GC.respond_to?(:copy_on_write_friendly=)
+  GC.copy_on_write_friendly = true
+end
+
+before_exec do |server|
+  ENV['BUNDLE_GEMFILE'] = APP_PATH + "/Gemfile"
+end
+
+before_fork do |server, worker|
+  defined?(ActiveRecord::Base) and ActiveRecord::Base.connection.disconnect!
+
+  old_pid = "#{ server.config[:pid] }.oldbin"
+  unless old_pid == server.pid
     begin
-      Process.kill("QUIT", File.read(old_pid).to_i)
+      Process.kill :QUIT, File.read(old_pid).to_i
     rescue Errno::ENOENT, Errno::ESRCH
-      # someone else did our job for us
+
     end
   end
 end
 
 after_fork do |server, worker|
-  if defined?(ActiveRecord::Base)
-    ActiveRecord::Base.establish_connection
-  end
-end
-
-before_exec do |server| # 修正无缝重启unicorn后更新的Gem未生效的问题，原因是config/boot.rb会优先从ENV中获取BUNDLE_GEMFILE，而无缝重启时ENV['BUNDLE_GEMFILE']的值并未被清除，仍指向旧目录的Gemfile
-  ENV["BUNDLE_GEMFILE"] = "#{app_path}/current/Gemfile"
+  defined?(ActiveRecord::Base) and ActiveRecord::Base.establish_connection
 end

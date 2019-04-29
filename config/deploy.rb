@@ -11,6 +11,22 @@ set :repo_url, "git@github.com:Woner1/devise_deploy.git"
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/ankh/ruby/deploy"
 
+
+
+
+
+set :rbenv_type, :user
+set :rbenv_ruby, '2.4.4'
+set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
+set :rbenv_map_bins, %w{rake gem bundle ruby rails}
+set :rbenv_roles, :all
+
+set :log_level, :warn 
+set :unicorn_pid, "#{shared_path}/tmp/pids/unicorn.pid"
+set :unicorn_config_path, -> { File.join(current_path, "config", "unicorn.rb") }
+
+
+
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
 
@@ -27,6 +43,8 @@ append :linked_files, "config/database.yml", "config/master.key"
 # Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system"
 
+
+
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
 
@@ -38,26 +56,20 @@ append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/syst
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
-set :passenger_restart_with_sudo, true
-
-
-after 'deploy:publishing', 'deploy:restart'
 namespace :deploy do
-
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
+    after :restart, :clear_cache do
+      on roles(:web), in: :groups, limit: 3, wait: 10 do
+        # Here we can do anything such as:
+        # within release_path do
+        #   execute :rake, 'cache:clear'
+        # end
+      end
     end
   end
-
-  task :restart do
-    invoke 'unicorn:legacy_restart'
-  end
-
-end
-
-#set :rbenv_map_bins, %w{rake gem bundle ruby rails sidekiq sidekiqctl}
-set :unicorn_config_path, -> { File.join(current_path, "config", "unicorn.rb") }
+  
+  after 'deploy:publishing', 'deploy:restart'
+  namespace :deploy do
+    task :restart do
+      invoke 'unicorn:restart'
+    end
+end    
